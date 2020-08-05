@@ -96,7 +96,6 @@ with open(data_filename, encoding ="utf8") as csv_file:
     for row in csv_reader:
         response = requests.get("https://api.dictionaryapi.dev/api/v2/entries/en/" + row[0])
         json = response.json()
-        print(json)
         url = json[0]["phonetics"][0]["audio"]
         audio = requests.get(url)
         audio_name = url.rsplit('/', 1)[1]
