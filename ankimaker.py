@@ -5,6 +5,9 @@ import random
 import genanki
 import json
 import requests
+import tempfile
+import shutil
+
 
 # Filename of the data file
 data_filename = "Word List.txt"
@@ -89,6 +92,11 @@ anki_notes = []
 # The list of medias
 media_files = []
 
+# Create a temporary Directory to put the sources
+temp_dir = tempfile.TemporaryDirectory()
+
+print(temp_dir)
+
 with open(data_filename, encoding ="utf8") as csv_file:
 
     csv_reader = csv.reader(csv_file, delimiter="\n")
@@ -100,10 +108,10 @@ with open(data_filename, encoding ="utf8") as csv_file:
         audio = requests.get(url)
         audio_name = url.rsplit('/', 1)[1]
 
-        with open(audio_name, 'wb') as f:
+        with open(temp_dir.name + "\\" + audio_name, 'wb') as f:
             f.write(audio.content)
 
-        media_files.append(audio_name)
+        media_files.append(temp_dir.name + "\\" + audio_name)
 
         anki_note = genanki.Note(
             model=anki_model,
@@ -134,3 +142,9 @@ for anki_note in anki_notes:
 anki_package.write_to_file(deck_filename)
 
 print("Created deck with {} flashcards".format(len(anki_deck.notes)))
+
+## Removing sources generated in the process
+try:
+    shutil.rmtree(temp_dir.name)
+except OSError as e:
+    print ("Error: %s - %s." % (e.filename, e.strerror))
